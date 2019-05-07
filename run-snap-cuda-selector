@@ -1,0 +1,9 @@
+#!/bin/sh -e
+d="$SNAP"/usr/lib/gpu-support
+if [ ! -x "$d"/snap-cuda-selector ]; then
+	echo "please connect cuda-runtime to continue" >&2
+	echo "snap connect $SNAP_NAME:cuda-runtime snapd-nvidia-core18:cuda-runtime" >&2
+else
+	"$d"/snap-cuda-selector "$d"
+fi
+exec "$@"

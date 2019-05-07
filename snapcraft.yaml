@@ -1,0 +1,41 @@
+name: hello-cuda
+version: "1"
+summary: Hello Wolrd CUDA application packaged as a snap
+description: |
+    A hello-world CUDA application which can reuse CUDA libraries from legacy
+    nvidia support or from modern content-based nvidia support.
+
+confinement: strict
+grade: stable
+architectures: [amd64]
+
+base: core18
+
+apps:
+    hello-cuda:
+        command-chain: [usr/bin/run-snap-cuda-selector]
+        command: usr/bin/hello-cuda
+        environment:
+            LD_LIBRARY_PATH: $SNAP/usr/lib/gpu-support
+        # XXX: The cuda interface should work without the need to separately
+        # add network and network-bind required for internal CUDA IPC system.
+        plugs: [opengl, network, network-bind, cuda-runtime]
+        adapter: none
+
+plugs:
+    cuda-runtime:
+        interface: content
+        content: cuda-1
+        target: $SNAP/usr/lib/gpu-support
+        default-provider: snapd-core18-nvidia
+
+layout:
+    $SNAP/usr/lib/gpu-support:
+        type: tmpfs
+
+parts:
+    hello-cuda:
+        plugin: make
+        make-parameters: [prefix=/usr]
+        source: .
+        build-packages: [g++, nvidia-cuda-toolkit]
